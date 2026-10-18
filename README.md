@@ -5,7 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 A custom [Home
-Assistant](https://www.home-assistant.io/) Lovelace card emulating the 7-inch obsidian glass front-panel touch interface of the [Hyperion Apr-16](https://www.avproglobal.com/products/acp-hype-apr-16) Immersive Sound Pre-Amp Processor.
+Assistant](https://www.home-assistant.io/) Lovelace card emulating the front-panel touch interface of the [Hyperion Apr-16](https://www.avproglobal.com/products/acp-hype-apr-16) Immersive Sound Pre-Amp Processor.
+This is an extension of the [Hyperion Integration](https://github.com/fattykidd/ha-hyperion-apr16)
 
 ## Features
 - **Obsidian Glass UI:** Dark charcoal glass styling with electric blue (`#0066ff` / `#00a5ff`) accents and precision track ticks.
