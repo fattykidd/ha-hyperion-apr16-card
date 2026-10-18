@@ -1,20 +1,14 @@
 {
   "name": "ha-hyperion-apr16-card",
   "version": "0.1.0",
-  "type":"module",
-  "description": "",
-  "main": "index.js",
+  "description": "Custom front-panel display card for AudioControl Hyperion APR-16",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "type": "commonjs",
-  "dependencies": {
-    "lit": "^3.3.3"
+    "build": "vite build"
   },
   "devDependencies": {
-    "typescript": "^7.0.2",
-    "vite": "^8.3.4",
-    "vite-plugin-dts": "^5.1.2"
+    "lit": "^3.1.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
   }
 }
