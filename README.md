@@ -43,7 +43,7 @@ entity: media_player.hyperion_apr16
 channels: "7.6.4"
 ```
 
-![Screenshot 2](assets/screen6.png)
+![Screenshot 2]("assets/pic6.png")
 
 ```yaml
 type: custom:ha-hyperion-apr16-card
@@ -51,13 +51,13 @@ entity: media_player.hyperion_apr16
 channels: "2.0"
 ```
 
-![Screenshot 3](assets/screen7.png)
+![Screenshot 3]("assets/pic7.png")
 
 ## Screenshots In Action
 
-![Screenshot 4](assets/screen1.png) ![Screenshot 5](assets/screen2.png)
-<br>
-![Screenshot 6](assets/screen3.png) ![Screenshot 7](assets/screen4.png)
+![Screenshot 4](assets/pic1.png) ![Screenshot 5](assets/pic2.png)
+
+![Screenshot 6](assets/pic3.png) ![Screenshot 7](assets/pic4.png)
 
 ## Acknowledgements and Attributions 
 
