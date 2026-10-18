@@ -43,7 +43,7 @@ entity: media_player.hyperion_apr16
 channels: "7.6.4"
 ```
 
-![Screenshot 2]("assets/pic6.png")
+![Screenshot 2](assets/pic6.png)
 
 ```yaml
 type: custom:ha-hyperion-apr16-card
@@ -51,7 +51,7 @@ entity: media_player.hyperion_apr16
 channels: "2.0"
 ```
 
-![Screenshot 3]("assets/pic7.png")
+![Screenshot 3](assets/pic7.png)
 
 ## Screenshots In Action
 
