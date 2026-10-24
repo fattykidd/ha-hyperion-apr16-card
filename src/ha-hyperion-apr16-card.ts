@@ -64,15 +64,24 @@ export class HaHyperionApr16Card extends LitElement {
 
   private _selectSoundMode(e: Event): void {
     const mode = (e.target as HTMLSelectElement).value;
-    this.hass.callService('media_player', 'select_sound_mode', {
-      entity_id: this.config.entity,
-      sound_mode: mode,
+    const entityBase = this.config.entity.replace('media_player.', '');
+    
+    this.hass.callService('select', 'select_option', {
+      entity_id: `select.${entityBase}_audio_mode`,
+      option: mode,
     });
+  }
+
+  private _getAttrValue(attrName: string): number {
+    const entityBase = this.config.entity.replace('media_player.', '');
+    const stateObj = this.hass.states[`number.${entityBase}_${attrName}`];
+    return stateObj ? parseFloat(stateObj.state) : 0;
   }
 
   private _setCustomAttr(attrName: string, e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
     const entityBase = this.config.entity.replace('media_player.', '');
+    
     this.hass.callService('number', 'set_value', {
       entity_id: `number.${entityBase}_${attrName}`,
       value: val,
@@ -80,10 +89,11 @@ export class HaHyperionApr16Card extends LitElement {
   }
 
   private _setBrightness(e: Event): void {
-    const val = parseInt((e.target as HTMLInputElement).value, 10);
+    const val = parseFloat((e.target as HTMLInputElement).value);
     const entityBase = this.config.entity.replace('media_player.', '');
+    
     this.hass.callService('number', 'set_value', {
-      entity_id: `number.${entityBase}_display_brightness`,
+      entity_id: `number.${entityBase}_panel_brightness`,
       value: val,
     });
   }
