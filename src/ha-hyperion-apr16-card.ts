@@ -72,31 +72,35 @@ export class HaHyperionApr16Card extends LitElement {
 
   private _setCustomAttr(attrName: string, e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
-    this.hass.callService(this.serviceDomain, 'set_audio_config', {
-      entity_id: this.config.entity,
-      [attrName]: val,
+    const entityBase = this.config.entity.replace('media_player.', '');
+    this.hass.callService('number', 'set_value', {
+      entity_id: `number.${entityBase}_${attrName}`,
+      value: val,
     });
   }
 
   private _setBrightness(e: Event): void {
     const val = parseInt((e.target as HTMLInputElement).value, 10);
-    this.hass.callService(this.serviceDomain, 'set_display_brightness', {
-      entity_id: this.config.entity,
-      brightness: val,
+    const entityBase = this.config.entity.replace('media_player.', '');
+    this.hass.callService('number', 'set_value', {
+      entity_id: `number.${entityBase}_display_brightness`,
+      value: val,
     });
   }
 
   private _rebootDevice(): void {
     if (confirm('Are you sure you want to reboot the AudioControl Hyperion APR-16?')) {
-      this.hass.callService(this.serviceDomain, 'reboot', {
-        entity_id: this.config.entity,
+      const entityBase = this.config.entity.replace('media_player.', '');
+      this.hass.callService('button', 'press', {
+        entity_id: `button.${entityBase}_reboot`,
       });
     }
   }
 
   private _triggerHpd(): void {
-    this.hass.callService(this.serviceDomain, 'trigger_hpd', {
-      entity_id: this.config.entity,
+    const entityBase = this.config.entity.replace('media_player.', '');
+    this.hass.callService('button', 'press', {
+      entity_id: `button.${entityBase}_trigger_hpd`,
     });
   }
 
