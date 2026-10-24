@@ -128,8 +128,12 @@ export class HaHyperionApr16Card extends LitElement {
     const absVolEntityId = `sensor.${entityBase}_volume_absolute`;
     const absVolState = this.hass.states[absVolEntityId];
 
-    const volumePercent = absVolState ? parseFloat(absVolState.state) : 0;
-    const volumeDb = absVolState?.attributes?.volume_db ?? '-20.0';
+    // Volume level (0-100%)
+    const volumeLevel = attr.volume_level ?? 0; // HA media_player volume_level is 0.0 to 1.0
+    const volumePercent = absVolState ? parseFloat(absVolState.state) : (volumeLevel * 100);
+    
+    // Volume dB (fallback to attribute or compute from volume level if missing)
+    const volumeDb = attr.volume_db ?? absVolState?.attributes?.volume_db ?? (Math.round((volumePercent * 0.8) - 80)).toFixed(1);
 
     const attr = stateObj.attributes;
     const isOnline = stateObj.state !== 'unavailable' && stateObj.state !== 'off';
@@ -143,11 +147,14 @@ export class HaHyperionApr16Card extends LitElement {
     const availableSources = attr.source_list || ['HDMI 1', 'HDMI 2', 'eARC', 'Media', 'Analog'];
     const availableSoundModes = attr.sound_mode_list || ['Direct Mode', 'DTS Neural:X', 'Stereo', 'All Channel Stereo', 'Dolby Mode', 'Native', 'Dolby Surround'];
 
+    // System attributes & Info modal data (pulling from entity attributes with live fallbacks)
     const channelLayout = attr.channel_layout || attr.channels || this.customChannelLayout;
-    const fwVersion = attr.firmware_version ?? 'v1.4.2-build88';
-    const ipAddress = attr.ip_address ?? '192.168.1.150';
-    const macAddress = attr.mac_address ?? '00:1A:2B:3C:4D:5E';
-    const uptime = attr.uptime ?? '4 days, 12 hours';
+    const fwVersion = attr.firmware_version ?? '1.2.0';
+    const gitCommit = attr.git_commit ? ` (${attr.git_commit})` : '';
+    const ipAddress = attr.ip_address || attr.host || stateObj.attributes.host_ip || 'Connected';
+    const macAddress = attr.mac_address || 'Active Device';
+    const uptime = attr.uptime || 'Running';
+    const temperature = attr.temperature ?? 'N/A';
 
     // Fetch live states for sliders using helper
     const bass = this._getAttrValue('bass');
@@ -166,14 +173,14 @@ export class HaHyperionApr16Card extends LitElement {
               <span>HARDWARE SYSTEM INFO</span>
               <button class="close-modal-btn" @click="${() => this.showInfoModal = false}">✕</button>
             </div>
-            <div class="modal-body">
+           <div class="modal-body">
               <div class="info-row"><span>Device Model:</span> <strong>AudioControl Hyperion APR-16</strong></div>
-              <div class="info-row"><span>Firmware Version:</span> <strong>${fwVersion}</strong></div>
+              <div class="info-row"><span>Firmware Version:</span> <strong>v${fwVersion}${gitCommit}</strong></div>
+              <div class="info-row"><span>Internal Temperature:</span> <strong class="mono">${temperature} °C</strong></div>
               <div class="info-row"><span>Channel Layout:</span> <strong>${channelLayout}</strong></div>
               <div class="info-row"><span>IP Address:</span> <strong class="mono">${ipAddress}</strong></div>
               <div class="info-row"><span>MAC Address:</span> <strong class="mono">${macAddress}</strong></div>
               <div class="info-row"><span>System Uptime:</span> <strong>${uptime}</strong></div>
-              <div class="info-row"><span>DSP Core:</span> <strong>SHARC Audio Engine (48kHz / Dirac ART)</strong></div>
             </div>
             <div class="modal-footer">
               <button class="modal-action-btn" @click="${() => this.showInfoModal = false}">CLOSE</button>
