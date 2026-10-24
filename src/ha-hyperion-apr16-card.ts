@@ -9,7 +9,7 @@ export class HaHyperionApr16Card extends LitElement {
   @state() private activeMenu: 'main' | 'config' | 'system' = 'main';
   @state() private showInfoModal: boolean = false;
   private customChannelLayout: string = '7.3.6';
-  private serviceDomain: string = 'hyperion_apr16'; // Updated to match your integration domain
+  private serviceDomain: string = 'hyperion_apr16';
 
   public setConfig(config: any): void {
     if (!config.entity) {
@@ -47,7 +47,6 @@ export class HaHyperionApr16Card extends LitElement {
 
   private _setVolumePercent(e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
-    // HA media_player.volume_set expects 0.0 to 1.0
     this.hass.callService('media_player', 'volume_set', {
       entity_id: this.config.entity,
       volume_level: val / 100,
@@ -65,7 +64,6 @@ export class HaHyperionApr16Card extends LitElement {
   private _selectSoundMode(e: Event): void {
     const mode = (e.target as HTMLSelectElement).value;
     const entityBase = this.config.entity.replace('media_player.', '');
-    
     this.hass.callService('select', 'select_option', {
       entity_id: `select.${entityBase}_audio_mode`,
       option: mode,
@@ -81,7 +79,6 @@ export class HaHyperionApr16Card extends LitElement {
   private _setCustomAttr(attrName: string, e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
     const entityBase = this.config.entity.replace('media_player.', '');
-    
     this.hass.callService('number', 'set_value', {
       entity_id: `number.${entityBase}_${attrName}`,
       value: val,
@@ -91,7 +88,6 @@ export class HaHyperionApr16Card extends LitElement {
   private _setBrightness(e: Event): void {
     const val = parseFloat((e.target as HTMLInputElement).value);
     const entityBase = this.config.entity.replace('media_player.', '');
-    
     this.hass.callService('number', 'set_value', {
       entity_id: `number.${entityBase}_panel_brightness`,
       value: val,
@@ -128,7 +124,6 @@ export class HaHyperionApr16Card extends LitElement {
       `;
     }
 
-    // Automatically derive the absolute volume sensor entity ID from the media player entity ID
     const entityBase = this.config.entity.replace('media_player.', '');
     const absVolEntityId = `sensor.${entityBase}_volume_absolute`;
     const absVolState = this.hass.states[absVolEntityId];
@@ -140,23 +135,27 @@ export class HaHyperionApr16Card extends LitElement {
     const isOnline = stateObj.state !== 'unavailable' && stateObj.state !== 'off';
     const isMuted = attr.is_volume_muted ?? false;
     const activeInput = attr.source ?? 'HDMI 1';
-    const audioMode = attr.sound_mode ?? 'DTS:X Pro';
-    const availableSources = attr.source_list || ['HDMI 1', 'HDMI 2', 'eARC', 'Media', 'Analog'];
-    const availableSoundModes = attr.sound_mode_list || ['DTS:X Pro', 'Dolby Atmos', 'Auro-3D', 'Stereo Direct'];
+    
+    // Read audio mode from select entity state if available, fallback to attr
+    const selectModeState = this.hass.states[`select.${entityBase}_audio_mode`];
+    const audioMode = selectModeState ? selectModeState.state : (attr.sound_mode ?? 'DTS:X Pro');
 
-    // System attributes & Info modal data
+    const availableSources = attr.source_list || ['HDMI 1', 'HDMI 2', 'eARC', 'Media', 'Analog'];
+    const availableSoundModes = attr.sound_mode_list || ['Direct Mode', 'DTS Neural:X', 'Stereo', 'All Channel Stereo', 'Dolby Mode', 'Native', 'Dolby Surround'];
+
     const channelLayout = attr.channel_layout || attr.channels || this.customChannelLayout;
-    const displayBrightness = attr.display_brightness ?? 100;
     const fwVersion = attr.firmware_version ?? 'v1.4.2-build88';
     const ipAddress = attr.ip_address ?? '192.168.1.150';
     const macAddress = attr.mac_address ?? '00:1A:2B:3C:4D:5E';
     const uptime = attr.uptime ?? '4 days, 12 hours';
 
-    // Per-input config attributes
-    const bass = attr.bass ?? 0;
-    const treble = attr.treble ?? 0;
-    const trim = attr.channel_trim ?? 0;
-    const lipsync = attr.lipsync_delay ?? 0;
+    // Fetch live states for sliders using helper
+    const bass = this._getAttrValue('bass');
+    const treble = this._getAttrValue('treble');
+    const trim = this._getAttrValue('channel_trim');
+    const gain = this._getAttrValue('channel_gain');
+    const lipsync = this._getAttrValue('lipsync_delay');
+    const displayBrightness = this._getAttrValue('panel_brightness');
 
     return html`
       <ha-card class="hyperion-display">
@@ -253,7 +252,7 @@ export class HaHyperionApr16Card extends LitElement {
             <div class="center-slider-group">
               <div class="slider-info"><span>BASS</span><span class="val">${bass > 0 ? `+${bass}` : bass} dB</span></div>
               <div class="slider-track-wrapper">
-                <input type="range" min="-12" max="12" step="0.5" .value="${bass}" @input="${(e: Event) => this._setCustomAttr('bass', e)}" class="center-slider" />
+                <input type="range" min="-12" max="12" step="0.5" .value="${bass}" @change="${(e: Event) => this._setCustomAttr('bass', e)}" class="center-slider" />
                 <div class="track-ticks">
                   <span class="tick"></span><span class="tick"></span><span class="tick center-tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
@@ -264,7 +263,7 @@ export class HaHyperionApr16Card extends LitElement {
             <div class="center-slider-group">
               <div class="slider-info"><span>TREBLE</span><span class="val">${treble > 0 ? `+${treble}` : treble} dB</span></div>
               <div class="slider-track-wrapper">
-                <input type="range" min="-12" max="12" step="0.5" .value="${treble}" @input="${(e: Event) => this._setCustomAttr('treble', e)}" class="center-slider" />
+                <input type="range" min="-12" max="12" step="0.5" .value="${treble}" @change="${(e: Event) => this._setCustomAttr('treble', e)}" class="center-slider" />
                 <div class="track-ticks">
                   <span class="tick"></span><span class="tick"></span><span class="tick center-tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
@@ -275,7 +274,18 @@ export class HaHyperionApr16Card extends LitElement {
             <div class="center-slider-group">
               <div class="slider-info"><span>CHANNEL TRIM</span><span class="val">${trim > 0 ? `+${trim}` : trim} dB</span></div>
               <div class="slider-track-wrapper">
-                <input type="range" min="-12" max="12" step="0.5" .value="${trim}" @input="${(e: Event) => this._setCustomAttr('channel_trim', e)}" class="center-slider" />
+                <input type="range" min="-12" max="12" step="1" .value="${trim}" @change="${(e: Event) => this._setCustomAttr('channel_trim', e)}" class="center-slider" />
+                <div class="track-ticks">
+                  <span class="tick"></span><span class="tick"></span><span class="tick center-tick"></span><span class="tick"></span><span class="tick"></span>
+                </div>
+              </div>
+              <div class="slider-ticks"><span>-12dB</span><span>-6dB</span><span>0dB</span><span>+6dB</span><span>+12dB</span></div>
+            </div>
+
+            <div class="center-slider-group">
+              <div class="slider-info"><span>CHANNEL GAIN</span><span class="val">${gain > 0 ? `+${gain}` : gain} dB</span></div>
+              <div class="slider-track-wrapper">
+                <input type="range" min="-12" max="12" step="1" .value="${gain}" @change="${(e: Event) => this._setCustomAttr('channel_gain', e)}" class="center-slider" />
                 <div class="track-ticks">
                   <span class="tick"></span><span class="tick"></span><span class="tick center-tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
@@ -286,7 +296,7 @@ export class HaHyperionApr16Card extends LitElement {
             <div class="center-slider-group">
               <div class="slider-info"><span>LIPSYNC DELAY</span><span class="val">${lipsync} ms</span></div>
               <div class="slider-track-wrapper">
-                <input type="range" min="0" max="250" step="5" .value="${lipsync}" @input="${(e: Event) => this._setCustomAttr('lipsync_delay', e)}" class="center-slider" />
+                <input type="range" min="0" max="250" step="5" .value="${lipsync}" @change="${(e: Event) => this._setCustomAttr('lipsync_delay', e)}" class="center-slider" />
                 <div class="track-ticks">
                   <span class="tick"></span><span class="tick"></span><span class="tick center-tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
@@ -301,7 +311,7 @@ export class HaHyperionApr16Card extends LitElement {
             <div class="center-slider-group">
               <div class="slider-info"><span>FRONT PANEL BRIGHTNESS</span><span class="val">${displayBrightness}%</span></div>
               <div class="slider-track-wrapper">
-                <input type="range" min="0" max="100" step="10" .value="${displayBrightness}" @input="${this._setBrightness}" class="center-slider" />
+                <input type="range" min="0" max="100" step="10" .value="${displayBrightness}" @change="${this._setBrightness}" class="center-slider" />
                 <div class="track-ticks">
                   <span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span><span class="tick"></span>
                 </div>
