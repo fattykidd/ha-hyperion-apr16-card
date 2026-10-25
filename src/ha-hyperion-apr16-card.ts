@@ -124,6 +124,8 @@ export class HaHyperionApr16Card extends LitElement {
       `;
     }
 
+    const attr = stateObj.attributes;
+    
     const entityBase = this.config.entity.replace('media_player.', '');
     const absVolEntityId = `sensor.${entityBase}_volume_absolute`;
     const absVolState = this.hass.states[absVolEntityId];
@@ -135,7 +137,6 @@ export class HaHyperionApr16Card extends LitElement {
     // Volume dB (fallback to attribute or compute from volume level if missing)
     const volumeDb = attr.volume_db ?? absVolState?.attributes?.volume_db ?? (Math.round((volumePercent * 0.8) - 80)).toFixed(1);
 
-    const attr = stateObj.attributes;
     const isOnline = stateObj.state !== 'unavailable' && stateObj.state !== 'off';
     const isMuted = attr.is_volume_muted ?? false;
     const activeInput = attr.source ?? 'HDMI 1';
